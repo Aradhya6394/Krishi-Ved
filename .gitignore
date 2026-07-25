@@ -1,0 +1,22 @@
+# Node
+**/node_modules/
+
+# Environment files
+**/.env
+
+# Python
+**/venv/
+**/__pycache__/
+
+# Logs
+*.log
+
+# VS Code
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Uploads
+backend/src/uploads/
