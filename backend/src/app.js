@@ -1,5 +1,6 @@
 import express from "express";
 import authRoutes from "./modules/auth/auth.routes.js";
+import weatherRoutes from "./modules/weather/weather.routes.js";
 
 const app = express();
 
@@ -10,5 +11,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/auth", authRoutes);
+app.use("/api/weather", weatherRoutes);
+
 
 export default app;
