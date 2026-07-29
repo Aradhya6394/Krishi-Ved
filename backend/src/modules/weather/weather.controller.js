@@ -1,4 +1,4 @@
-import { getCurrentWeather } from "./weather.service.js";
+import { getCurrentWeather, getWeatherForecast } from "./weather.service.js";
 
 const currentWeather = async (req, res) => {
     try {
@@ -18,5 +18,23 @@ const currentWeather = async (req, res) => {
         });
     }
 };
+const weatherForecast = async (req, res) => {
+    try {
+        const { city } = req.query;
 
-export { currentWeather };
+        const forecast = await getWeatherForecast(city);
+
+        res.status(200).json({
+            success: true,
+            data: forecast,
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Failed to fetch weather forecast",
+            error: error.response?.data?.message || error.message,
+        });
+    }
+};
+
+export { currentWeather , weatherForecast};
