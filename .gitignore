@@ -1,22 +1,27 @@
-# Node
-**/node_modules/
-
-# Environment files
-**/.env
-
-# Python
-**/venv/
-**/__pycache__/
-
-# Logs
-*.log
-
-# VS Code
-.vscode/
-
-# OS files
 .DS_Store
 Thumbs.db
 
-# Uploads
+# Environment variables
+.env
+.env.*
+
+# Dependencies
+node_modules/
+venv/
+__pycache__/
+*.pyc
+
+# Uploaded files
+backend/uploads/
 backend/src/uploads/
+
+# Python cache
+.pytest_cache/
+
+# Model/cache files
+.ipynb_checkpoints/
+
+# ML service
+ml-service/venv/
+ml-service/dataset/
+ml-service/image.jpeg
