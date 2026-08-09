@@ -1,10 +1,33 @@
 import express from "express";
-import { getPrices } from "./mandi.controller.js";
-import { validateMandiQuery } from "./mandi.validator.js";
+
+import {
+    getCommodities,
+    getGeographiesController,
+    getMarketsController,
+    getPricesController
+} from "./mandi.controller.js";
+
+import {
+    validateMarketsQuery,
+    validatePricesQuery
+} from "./mandi.validator.js";
 
 const router = express.Router();
 
-// Get mandi prices
-router.get("/prices", validateMandiQuery, getPrices);
+router.get("/commodities", getCommodities);
+
+router.get("/geographies", getGeographiesController);
+
+router.post(
+    "/markets",
+    validateMarketsQuery,
+    getMarketsController
+);
+
+router.post(
+    "/prices",
+    validatePricesQuery,
+    getPricesController
+);
 
 export default router;

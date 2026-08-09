@@ -1,23 +1,86 @@
-import { getMandiPrices } from "./mandi.service.js";
+import {
+    getMandiCommodities,
+    getGeographies,
+    getMarkets,
+    getPrices
+} from "./mandi.service.js";
 
-// Controller for mandi price requests
-export const getPrices = async (req, res) => {
+export const getCommodities = async (req, res, next) => {
     try {
-        // Read crop and state from query
-        const { crop, state } = req.query;
+        const commodities = await getMandiCommodities();
 
-        const result = await getMandiPrices(crop, state);
-
-        return res.status(200).json({
+        res.status(200).json({
             success: true,
-            data: result
+            data: commodities
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const getGeographiesController = async (req, res, next) => {
+    try {
+        const geographies = await getGeographies();
+
+        res.status(200).json({
+            success: true,
+            data: geographies
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const getMarketsController = async (req, res, next) => {
+    try {
+        const {
+            commodityId,
+            stateId,
+            districtId,
+            indicator
+        } = req.body;
+
+        const markets = await getMarkets(
+            commodityId,
+            stateId,
+            districtId,
+            indicator
+        );
+
+        res.status(200).json({
+            success: true,
+            data: markets
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const getPricesController = async (req, res, next) => {
+    try {
+        const {
+            commodityId,
+            stateId,
+            districtIds,
+            marketIds,
+            fromDate,
+            toDate
+        } = req.body;
+
+        const prices = await getPrices({
+            commodityId,
+            stateId,
+            districtIds,
+            marketIds,
+            fromDate,
+            toDate
         });
 
-    } catch (error) {
-        // Handle unexpected errors
-        return res.status(500).json({
-            success: false,
-            message: "Failed to fetch mandi prices"
+        res.status(200).json({
+            success: true,
+            data: prices
         });
+    } catch (error) {
+        next(error);
     }
 };
