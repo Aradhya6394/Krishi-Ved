@@ -1,15 +1,31 @@
 import { z } from "zod";
 
 const cropRecommendationSchema = z.object({
-    nitrogen: z.number().min(0),
-    phosphorus: z.number().min(0),
-    potassium: z.number().min(0),
+    location: z.string().min(2),
 
-    temperature: z.number(),
-    humidity: z.number().min(0).max(100),
+    season: z.enum([
+        "Kharif",
+        "Rabi",
+        "Zaid"
+    ]),
 
-    ph: z.number().min(0).max(14),
-    rainfall: z.number().min(0)
+    soilType: z.enum([
+        "Alluvial",
+        "Black",
+        "Red",
+        "Laterite",
+        "Sandy",
+        "Clay",
+        "Loamy"
+    ]),
+
+    irrigation: z.enum([
+        "Available",
+        "Limited",
+        "Not Available"
+    ]),
+
+    previousCrop: z.string().min(2)
 });
 
 export { cropRecommendationSchema };

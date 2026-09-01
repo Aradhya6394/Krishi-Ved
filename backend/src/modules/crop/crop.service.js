@@ -1,90 +1,140 @@
-import { crops } from "./crop.data.js";
-const recommendCrops = async ({
-    nitrogen,
-    phosphorus,
-    potassium,
-    temperature,
-    humidity,
-    ph,
-    rainfall
-}) => {
+import axios from "axios";
 
-    
-    const input = {
-        nitrogen,
-        phosphorus,
-        potassium,
-        temperature,
-        humidity,
-        ph,
-        rainfall
+const ML_SERVICE_URL = "http://127.0.0.1:5001";
+
+const soilProfiles = {
+    Alluvial: {
+        nitrogen: 80,
+        phosphorus: 45,
+        potassium: 40,
+        ph: 6.8
+    },
+    Black: {
+        nitrogen: 70,
+        phosphorus: 40,
+        potassium: 50,
+        ph: 7.5
+    },
+    Red: {
+        nitrogen: 50,
+        phosphorus: 35,
+        potassium: 35,
+        ph: 6.5
+    },
+    Laterite: {
+        nitrogen: 40,
+        phosphorus: 30,
+        potassium: 30,
+        ph: 5.8
+    },
+    Sandy: {
+        nitrogen: 45,
+        phosphorus: 25,
+        potassium: 25,
+        ph: 6.2
+    },
+    Clay: {
+        nitrogen: 75,
+        phosphorus: 45,
+        potassium: 45,
+        ph: 7.0
+    },
+    Loamy: {
+        nitrogen: 80,
+        phosphorus: 50,
+        potassium: 50,
+        ph: 6.8
+    }
+};
+
+const getSeasonConditions = (season) => {
+    const conditions = {
+        Kharif: {
+            temperature: 28,
+            humidity: 75,
+            rainfall: 180
+        },
+        Rabi: {
+            temperature: 20,
+            humidity: 55,
+            rainfall: 60
+        },
+        Zaid: {
+            temperature: 32,
+            humidity: 50,
+            rainfall: 40
+        }
     };
 
-    const recommendations = crops.map((crop) => {
+    return conditions[season];
+};
 
-        let score = 0;
-        let matchedConditions = 0;
+const recommendCrops = async ({
+    location,
+    season,
+    soilType,
+    irrigation,
+    previousCrop
+}) => {
+    try {
+        const soil = soilProfiles[soilType];
 
-        for (const key in crop.ideal) {
+        if (!soil) {
+            throw new Error("Invalid soil type");
+        }
 
-            const [min, max] = crop.ideal[key];
+        const conditions = getSeasonConditions(season);
 
-            if (input[key] >= min && input[key] <= max) {
-                score += 100 / 7;
-                matchedConditions++;
+        let rainfall = conditions.rainfall;
+
+        if (irrigation === "Available") {
+            rainfall += 20;
+        }
+
+        if (irrigation === "Not Available") {
+            rainfall -= 10;
+        }
+
+        const response = await axios.post(
+            `${ML_SERVICE_URL}/recommend-crops`,
+            {
+                N: soil.nitrogen,
+                P: soil.phosphorus,
+                K: soil.potassium,
+                temperature: conditions.temperature,
+                humidity: conditions.humidity,
+                ph: soil.ph,
+                rainfall
             }
-        }
+        );
 
-        score = Math.round(score);
+        let recommendations = response.data.recommendations;
 
-        let suitability;
+        recommendations = recommendations.map((item) => ({
+            ...item,
+            confidence:
+                item.crop.toLowerCase() === previousCrop.toLowerCase()
+                    ? Math.max(item.confidence - 15, 0)
+                    : item.confidence
+        }));
 
-        if (score >= 80) {
-            suitability = "High";
-        } else if (score >= 50) {
-            suitability = "Medium";
-        } else {
-            suitability = "Low";
-        }
+        recommendations.sort(
+            (a, b) => b.confidence - a.confidence
+        );
 
+        return recommendations;
 
+    } catch (error) {
+        console.error(
+            "ML Crop Recommendation Error:",
+            error.response?.data || error.message
+        );
 
-
-        const issues = [];
-
-        for (const key in crop.ideal) {
-            const [min, max] = crop.ideal[key];
-
-            if (input[key] < min) {
-                issues.push(`${key} is below the preferred range`);
-            } else if (input[key] > max) {
-                issues.push(`${key} is above the preferred range`);
-            }
-        }
-
-        let reason;
-
-        if (issues.length === 0) {
-            reason = "All major soil and weather conditions are within the preferred range.";
-        } else {
-            reason = issues.join(", ") + ".";
-        }
-
-
-
-
-        return {
-        crop: crop.crop,
-        score,
-        suitability,
-        matchedConditions,
-        reason
-        };
-    });
-
-    recommendations.sort((a, b) => b.score - a.score);
-
-    return recommendations.slice(0, 3);
+        throw new Error(
+            error.response?.data?.message ||
+            "Failed to get crop recommendations"
+        );
+    }
 };
 
 export { recommendCrops };

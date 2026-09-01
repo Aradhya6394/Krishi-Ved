@@ -1,532 +1,246 @@
 import { useState } from "react";
-import {
-    FaSeedling,
-    FaFlask,
-    FaTemperatureHigh,
-    FaTint,
-    FaCloudRain,
-    FaCheckCircle,
-    FaLeaf
-} from "react-icons/fa";
-
-import { recommendCrops } from "./crop.service.js";
-
+import { recommendCrops } from "../../services/crop.service";
+import "../../styles/crop.css";
 
 const Crop = () => {
-
     const [formData, setFormData] = useState({
-        nitrogen: "",
-        phosphorus: "",
-        potassium: "",
-        temperature: "",
-        humidity: "",
-        ph: "",
-        rainfall: ""
+        location: "",
+        season: "",
+        soilType: "",
+        irrigation: "",
+        previousCrop: ""
     });
 
     const [recommendations, setRecommendations] = useState([]);
-
     const [loading, setLoading] = useState(false);
-
     const [error, setError] = useState("");
 
-
     const handleChange = (e) => {
-
-        const { name, value } = e.target;
-
-        setFormData((previous) => ({
-            ...previous,
-            [name]: value
-        }));
-
+        setFormData({
+            ...formData,
+            [e.target.name]: e.target.value
+        });
     };
 
-
     const handleSubmit = async (e) => {
-
         e.preventDefault();
 
         setError("");
         setRecommendations([]);
-
         setLoading(true);
 
         try {
-
-            const cropData = {
-                nitrogen: Number(formData.nitrogen),
-                phosphorus: Number(formData.phosphorus),
-                potassium: Number(formData.potassium),
-                temperature: Number(formData.temperature),
-                humidity: Number(formData.humidity),
-                ph: Number(formData.ph),
-                rainfall: Number(formData.rainfall)
-            };
-
-
-            const result = await recommendCrops(cropData);
-
+            const result = await recommendCrops(formData);
             setRecommendations(result);
-
         } catch (error) {
-
-            setError(
-                error.message || "Failed to generate recommendations"
-            );
-
+            console.error(error);
+            setError("Unable to get crop recommendations. Please try again.");
         } finally {
-
             setLoading(false);
-
         }
     };
 
-
     return (
-        <div className="min-h-screen bg-emerald-50 px-4 py-8 sm:px-6 lg:px-8">
+        <div className="crop-page">
 
-            <div className="mx-auto max-w-7xl">
+            <header className="crop-header">
+                <div className="crop-header-left">
+                    <button
+                        className="crop-back-btn"
+                        onClick={() => window.history.back()}
+                    >
+                        ←
+                    </button>
 
-                {/* HEADER */}
-
-                <div className="mb-8">
-
-                    <div className="flex items-center gap-3">
-
-                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-100">
-
-                            <FaSeedling className="text-2xl text-emerald-600" />
-
-                        </div>
-
-                        <div>
-
-                            <h1 className="text-3xl font-bold text-slate-800">
-                                Crop Planning
-                            </h1>
-
-                            <p className="mt-1 text-sm text-slate-500 sm:text-base">
-                                Find the most suitable crops for your farm conditions.
-                            </p>
-
-                        </div>
-
+                    <div>
+                        <h1>Crop Planning</h1>
+                        <p>Smart crop recommendations for your farm</p>
                     </div>
-
                 </div>
 
+                <div className="crop-brand">
+                    🌿 <span>KrishiVed</span>
+                </div>
+            </header>
 
-                {/* INPUT SECTION */}
+            <main className="crop-container">
 
-                <section className="rounded-2xl border border-emerald-100 bg-white p-5 shadow-sm sm:p-7">
+                <section className="crop-intro">
+                    <div className="intro-icon">🌱</div>
 
-                    <div className="mb-6">
-
-                        <h2 className="text-xl font-bold text-slate-800">
-                            Enter Farm Conditions
-                        </h2>
-
-                        <p className="mt-1 text-sm text-slate-500">
-                            Provide your soil and weather information to get crop recommendations.
+                    <div>
+                        <h2>Find the Right Crop</h2>
+                        <p>
+                            Tell us about your farm and KrishiVed will
+                            recommend suitable crops using our ML model.
                         </p>
-
                     </div>
-
-
-                    <form onSubmit={handleSubmit}>
-
-                        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-
-
-                            {/* NITROGEN */}
-
-                            <div>
-
-                                <label className="mb-2 block text-sm font-semibold text-slate-700">
-                                    Nitrogen (N)
-                                </label>
-
-                                <div className="relative">
-
-                                    <FaFlask className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500" />
-
-                                    <input
-                                        type="number"
-                                        name="nitrogen"
-                                        value={formData.nitrogen}
-                                        onChange={handleChange}
-                                        min="0"
-                                        step="any"
-                                        placeholder="e.g. 80"
-                                        required
-                                        className="w-full rounded-xl border border-slate-200 py-3 pl-11 pr-4 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
-                                    />
-
-                                </div>
-
-                            </div>
-
-
-                            {/* PHOSPHORUS */}
-
-                            <div>
-
-                                <label className="mb-2 block text-sm font-semibold text-slate-700">
-                                    Phosphorus (P)
-                                </label>
-
-                                <div className="relative">
-
-                                    <FaFlask className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500" />
-
-                                    <input
-                                        type="number"
-                                        name="phosphorus"
-                                        value={formData.phosphorus}
-                                        onChange={handleChange}
-                                        min="0"
-                                        step="any"
-                                        placeholder="e.g. 40"
-                                        required
-                                        className="w-full rounded-xl border border-slate-200 py-3 pl-11 pr-4 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
-                                    />
-
-                                </div>
-
-                            </div>
-
-
-                            {/* POTASSIUM */}
-
-                            <div>
-
-                                <label className="mb-2 block text-sm font-semibold text-slate-700">
-                                    Potassium (K)
-                                </label>
-
-                                <div className="relative">
-
-                                    <FaFlask className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500" />
-
-                                    <input
-                                        type="number"
-                                        name="potassium"
-                                        value={formData.potassium}
-                                        onChange={handleChange}
-                                        min="0"
-                                        step="any"
-                                        placeholder="e.g. 50"
-                                        required
-                                        className="w-full rounded-xl border border-slate-200 py-3 pl-11 pr-4 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
-                                    />
-
-                                </div>
-
-                            </div>
-
-
-                            {/* TEMPERATURE */}
-
-                            <div>
-
-                                <label className="mb-2 block text-sm font-semibold text-slate-700">
-                                    Temperature (°C)
-                                </label>
-
-                                <div className="relative">
-
-                                    <FaTemperatureHigh className="absolute left-4 top-1/2 -translate-y-1/2 text-orange-500" />
-
-                                    <input
-                                        type="number"
-                                        name="temperature"
-                                        value={formData.temperature}
-                                        onChange={handleChange}
-                                        step="any"
-                                        placeholder="e.g. 28"
-                                        required
-                                        className="w-full rounded-xl border border-slate-200 py-3 pl-11 pr-4 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
-                                    />
-
-                                </div>
-
-                            </div>
-
-
-                            {/* HUMIDITY */}
-
-                            <div>
-
-                                <label className="mb-2 block text-sm font-semibold text-slate-700">
-                                    Humidity (%)
-                                </label>
-
-                                <div className="relative">
-
-                                    <FaTint className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-500" />
-
-                                    <input
-                                        type="number"
-                                        name="humidity"
-                                        value={formData.humidity}
-                                        onChange={handleChange}
-                                        min="0"
-                                        max="100"
-                                        step="any"
-                                        placeholder="e.g. 70"
-                                        required
-                                        className="w-full rounded-xl border border-slate-200 py-3 pl-11 pr-4 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
-                                    />
-
-                                </div>
-
-                            </div>
-
-
-                            {/* SOIL PH */}
-
-                            <div>
-
-                                <label className="mb-2 block text-sm font-semibold text-slate-700">
-                                    Soil pH
-                                </label>
-
-                                <div className="relative">
-
-                                    <FaLeaf className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500" />
-
-                                    <input
-                                        type="number"
-                                        name="ph"
-                                        value={formData.ph}
-                                        onChange={handleChange}
-                                        min="0"
-                                        max="14"
-                                        step="0.1"
-                                        placeholder="e.g. 6.5"
-                                        required
-                                        className="w-full rounded-xl border border-slate-200 py-3 pl-11 pr-4 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
-                                    />
-
-                                </div>
-
-                            </div>
-
-
-                            {/* RAINFALL */}
-
-                            <div className="sm:col-span-2 lg:col-span-3">
-
-                                <label className="mb-2 block text-sm font-semibold text-slate-700">
-                                    Rainfall (mm)
-                                </label>
-
-                                <div className="relative max-w-md">
-
-                                    <FaCloudRain className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-500" />
-
-                                    <input
-                                        type="number"
-                                        name="rainfall"
-                                        value={formData.rainfall}
-                                        onChange={handleChange}
-                                        min="0"
-                                        step="any"
-                                        placeholder="e.g. 120"
-                                        required
-                                        className="w-full rounded-xl border border-slate-200 py-3 pl-11 pr-4 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
-                                    />
-
-                                </div>
-
-                            </div>
-
-                        </div>
-
-
-                        {/* ERROR */}
-
-                        {error && (
-
-                            <div className="mt-5 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-600">
-                                {error}
-                            </div>
-
-                        )}
-
-
-                        {/* BUTTON */}
-
-                        <div className="mt-7">
-
-                            <button
-                                type="submit"
-                                disabled={loading}
-                                className="w-full rounded-xl bg-emerald-600 px-6 py-3.5 font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
-                            >
-
-                                {loading
-                                    ? "Analyzing..."
-                                    : "Get Crop Recommendations"
-                                }
-
-                            </button>
-
-                        </div>
-
-                    </form>
-
                 </section>
 
+                <form className="crop-form" onSubmit={handleSubmit}>
 
-                {/* RESULTS */}
+                    <div className="crop-field">
+                        <label>📍 Location</label>
+
+                        <input
+                            type="text"
+                            name="location"
+                            placeholder="e.g. Lucknow"
+                            value={formData.location}
+                            onChange={handleChange}
+                            required
+                        />
+                    </div>
+
+                    <div className="crop-field">
+                        <label>🌦️ Season</label>
+
+                        <select
+                            name="season"
+                            value={formData.season}
+                            onChange={handleChange}
+                            required
+                        >
+                            <option value="">Select season</option>
+                            <option value="Kharif">Kharif</option>
+                            <option value="Rabi">Rabi</option>
+                            <option value="Zaid">Zaid</option>
+                        </select>
+                    </div>
+
+                    <div className="crop-field">
+                        <label>🌱 Soil Type</label>
+
+                        <select
+                            name="soilType"
+                            value={formData.soilType}
+                            onChange={handleChange}
+                            required
+                        >
+                            <option value="">Select soil type</option>
+                            <option value="Alluvial">Alluvial</option>
+                            <option value="Black">Black</option>
+                            <option value="Red">Red</option>
+                            <option value="Laterite">Laterite</option>
+                            <option value="Sandy">Sandy</option>
+                            <option value="Loamy">Loamy</option>
+                            <option value="Clay">Clay</option>
+                        </select>
+                    </div>
+
+                    <div className="crop-field">
+                        <label>💧 Irrigation Availability</label>
+
+                        <select
+                            name="irrigation"
+                            value={formData.irrigation}
+                            onChange={handleChange}
+                            required
+                        >
+                            <option value="">Select irrigation</option>
+                            <option value="Available">Available</option>
+                            <option value="Limited">Limited</option>
+                            <option value="Rainfed">Rainfed</option>
+                        </select>
+                    </div>
+
+                    <div className="crop-field previous-crop-field">
+                        <label>🌾 Previous Crop</label>
+
+                        <select
+                            name="previousCrop"
+                            value={formData.previousCrop}
+                            onChange={handleChange}
+                            required
+                        >
+                            <option value="">Select previous crop</option>
+                            <option value="Rice">Rice</option>
+                            <option value="Maize">Maize</option>
+                            <option value="Wheat">Wheat</option>
+                            <option value="Cotton">Cotton</option>
+                            <option value="Chickpea">Chickpea</option>
+                            <option value="Groundnut">Groundnut</option>
+                            <option value="Soybean">Soybean</option>
+                            <option value="Potato">Potato</option>
+                            <option value="Sugarcane">Sugarcane</option>
+                            <option value="None">None</option>
+                        </select>
+                    </div>
+
+                    <button
+                        type="submit"
+                        className="recommend-btn"
+                        disabled={loading}
+                    >
+                        {loading
+                            ? "Finding Best Crops..."
+                            : "🌱 Get Crop Recommendation"}
+                    </button>
+
+                </form>
+
+                {error && (
+                    <div className="crop-error">
+                        ⚠️ {error}
+                    </div>
+                )}
 
                 {recommendations.length > 0 && (
+                    <section className="recommendation-section">
 
-                    <section className="mt-10">
-
-                        <div className="mb-5">
-
-                            <h2 className="text-2xl font-bold text-slate-800">
-                                Recommended Crops
-                            </h2>
-
-                            <p className="mt-1 text-sm text-slate-500 sm:text-base">
-                                Based on the soil and weather conditions you provided.
-                            </p>
-
+                        <div className="recommendation-heading">
+                            <div>
+                                <h2>🌾 Recommended Crops</h2>
+                                <p>
+                                    Based on the information provided about
+                                    your farm
+                                </p>
+                            </div>
                         </div>
 
+                        <div className="crop-results">
 
-                        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-
-                            {recommendations.map((recommendation, index) => (
-
+                            {recommendations.map((item, index) => (
                                 <div
-                                    key={recommendation.crop}
-                                    className="rounded-2xl border border-emerald-100 bg-white p-6 shadow-sm"
+                                    className={`recommendation-card ${
+                                        index === 0 ? "best-crop" : ""
+                                    }`}
+                                    key={`${item.crop}-${index}`}
                                 >
-
-                                    {/* CROP HEADER */}
-
-                                    <div className="flex items-start justify-between gap-3">
-
-                                        <div className="flex items-center gap-3">
-
-                                            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50">
-
-                                                <FaSeedling className="text-xl text-emerald-600" />
-
-                                            </div>
-
-                                            <div>
-
-                                                <h3 className="text-lg font-bold text-slate-800">
-                                                    {recommendation.crop}
-                                                </h3>
-
-                                                <p className="text-sm text-slate-500">
-                                                    Recommendation #{index + 1}
-                                                </p>
-
-                                            </div>
-
-                                        </div>
-
+                                    <div className="crop-rank">
+                                        #{index + 1}
                                     </div>
 
-
-                                    {/* SCORE */}
-
-                                    <div className="mt-6">
-
-                                        <div className="flex items-center justify-between">
-
-                                            <span className="text-sm font-medium text-slate-500">
-                                                Suitability
-                                            </span>
-
-                                            <span
-                                                className={`rounded-full px-3 py-1 text-xs font-bold ${
-                                                    recommendation.suitability === "High"
-                                                        ? "bg-emerald-100 text-emerald-700"
-                                                        : recommendation.suitability === "Medium"
-                                                            ? "bg-yellow-100 text-yellow-700"
-                                                            : "bg-red-100 text-red-700"
-                                                }`}
-                                            >
-                                                {recommendation.suitability}
-                                            </span>
-
-                                        </div>
-
-
-                                        <div className="mt-2 flex items-end gap-1">
-
-                                            <span className="text-3xl font-bold text-slate-800">
-                                                {recommendation.score}%
-                                            </span>
-
-                                            <span className="mb-1 text-sm text-slate-500">
-                                                suitable
-                                            </span>
-
-                                        </div>
-
-
-                                        <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-100">
-
-                                            <div
-                                                className="h-full rounded-full bg-emerald-500"
-                                                style={{
-                                                    width: `${recommendation.score}%`
-                                                }}
-                                            />
-
-                                        </div>
-
+                                    <div className="crop-result-icon">
+                                        🌱
                                     </div>
 
+                                    <h3>{item.crop}</h3>
 
-                                    {/* MATCHED CONDITIONS */}
+                                    <div className="confidence-value">
+                                        {item.confidence}%
+                                    </div>
 
-                                    <div className="mt-5 flex items-center gap-2 text-sm text-slate-600">
+                                    <div className="confidence-label">
+                                        Suitability
+                                    </div>
 
-                                        <FaCheckCircle className="text-emerald-500" />
-
-                                        <span>
-                                            {recommendation.matchedConditions}/7 conditions matched
+                                    {index === 0 && (
+                                        <span className="best-match">
+                                            ⭐ Best Match
                                         </span>
-
-                                    </div>
-
-
-                                    {/* REASON */}
-
-                                    <div className="mt-5 rounded-xl bg-slate-50 p-4">
-
-                                        <p className="text-sm leading-6 text-slate-600">
-                                            {recommendation.reason}
-                                        </p>
-
-                                    </div>
-
+                                    )}
                                 </div>
-
                             ))}
 
                         </div>
 
                     </section>
-
                 )}
 
-            </div>
-
+            </main>
         </div>
     );
 };
-
 
 export default Crop;
